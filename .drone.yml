@@ -1,0 +1,9 @@
+pipeline:
+  build:
+    image: docker
+    commands:
+      - docker login -u azuruce -p ${PASSWORD}
+      - docker build -t azuruce/jenkins-drone:lts-alpine .
+      - docker push azuruce/jenkins-drone:lts-alpine
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
