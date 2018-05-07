@@ -1,11 +1,26 @@
+FROM golang:1.9 as builder
+
+ARG DRONE_CLI_VERSION=v0.8.5
+ARG DRONE_CLI_REPO=github.com/drone/drone-cli
+ARG DRONE_CLI_PACKAGE=$DRONE_CLI_REPO/drone
+
+RUN set -x \
+ && go get -v -d "$DRONE_CLI_PACKAGE" \
+ && cd "$GOPATH/src/$DRONE_CLI_REPO" \
+ && git checkout --detach \
+ && git reset --hard "$DRONE_CLI_VERSION" \
+ && git clean -df \
+ && CGO_ENABLED=0 go build -a \
+      -ldflags "-X main.version=${DRONE_CLI_VERSION##v} -s -extldflags '-static'" \
+      -o /usr/local/bin/drone \
+      "$DRONE_CLI_PACKAGE"
+
 FROM jenkins/jenkins:lts-alpine
 LABEL maintainer="azuruce@gmail.com"
 USER root
-RUN cat /etc/apk/repositories
+COPY --from=builder /usr/local/bin/drone /usr/local/bin/drone
 RUN apk update
 RUN apk add docker
-RUN curl -L https://github.com/drone/drone-cli/releases/download/v0.8.5/drone_linux_amd64.tar.gz | tar -zx -C /tmp
-RUN install -t /usr/local/bin /tmp/drone
 # docker group should have gid of 1001 instead of 101
 RUN sed -ie "s/docker:x:101/docker:x:1001/g" /etc/group
 # jenkins user should be in docker group
