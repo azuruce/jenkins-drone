@@ -1,10 +1,7 @@
 pipeline:
   build:
-    image: docker
-    commands:
-      - docker login -u azuruce -p ${PASSWORD}
-      - ls -al
-      - docker build -t azuruce/jenkins-drone:lts-alpine .
-      - echo docker push azuruce/jenkins-drone:lts-alpine
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
+    image: plugins/docker
+    username: ${DOCKER_USERNAME}
+    password: ${DOCKER_PASSWORD}
+    repo: azuruce/jenkins-drone
+    tags: lts-alpine
