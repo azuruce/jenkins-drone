@@ -25,4 +25,6 @@ RUN apk add docker
 RUN sed -ie "s/docker:x:101/docker:x:1001/g" /etc/group
 # jenkins user should be in docker group
 RUN adduser jenkins docker
+# jenkins time zone should be set to PDT
+RUN echo "America/Los_Angeles" > /etc/timezone
 USER jenkins
